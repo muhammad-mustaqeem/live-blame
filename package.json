@@ -1,0 +1,172 @@
+{
+  "name": "live-blame",
+  "displayName": "Live Blame",
+  "description": "Live inline git blame that stays correct under uncommitted edits, branch switches, rebases, and large files.",
+  "version": "0.2.0",
+  "publisher": "local-dev",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": ["SCM Providers", "Other"],
+  "keywords": ["git", "blame", "inline", "annotation"],
+  "main": "./dist/extension.js",
+  "extensionKind": ["workspace"],
+  "activationEvents": ["onStartupFinished"],
+  "extensionDependencies": ["vscode.git"],
+  "contributes": {
+    "configuration": {
+      "title": "Live Blame",
+      "properties": {
+        "liveBlame.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Master switch. Turn off to disable inline blame and hovers."
+        },
+        "liveBlame.format": {
+          "type": "string",
+          "default": "${author}, ${ago} • ${summary}",
+          "description": "Inline template. Tokens: ${author} ${authorEmail} ${ago} ${date} ${summary} ${hash} ${pr}."
+        },
+        "liveBlame.uncommittedFormat": {
+          "type": "string",
+          "default": "You, uncommitted",
+          "description": "Inline text shown for lines you've changed but not committed."
+        },
+        "liveBlame.delay": {
+          "type": "number",
+          "default": 500,
+          "minimum": 0,
+          "maximum": 5000,
+          "description": "Trailing debounce in ms after edits / cursor moves before re-blaming."
+        },
+        "liveBlame.maxLines": {
+          "type": "number",
+          "default": 50000,
+          "description": "Skip blame on files with more than this many lines."
+        },
+        "liveBlame.maxFileSizeBytes": {
+          "type": "number",
+          "default": 5242880,
+          "description": "Skip blame on files larger than this many bytes (default 5 MB)."
+        },
+        "liveBlame.largeFileLines": {
+          "type": "number",
+          "default": 10000,
+          "description": "Files with more lines than this use single-line blame mode (faster on huge files)."
+        },
+        "liveBlame.showOnAllLines": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show blame on every line instead of only the cursor's line."
+        },
+        "liveBlame.showPRLink": {
+          "type": "boolean",
+          "default": true,
+          "description": "Detect and show pull request links in the hover."
+        },
+        "liveBlame.processPoolSize": {
+          "type": "number",
+          "default": 4,
+          "minimum": 1,
+          "maximum": 16,
+          "description": "Maximum concurrent git blame processes."
+        },
+        "liveBlame.hover.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the rich hover (commit body, co-authors, stats, and the introducing diff) when hovering a line."
+        },
+        "liveBlame.hover.showDiff": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include the diff hunk that introduced the hovered line in the hover."
+        },
+        "liveBlame.hover.diffMaxLines": {
+          "type": "number",
+          "default": 40,
+          "minimum": 0,
+          "description": "Truncate the hover diff to this many lines (0 = no limit)."
+        },
+        "liveBlame.timeTravel.commitPickerLimit": {
+          "type": "number",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 500,
+          "description": "How many recent commits to list in 'Blame at Revision…'."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "liveBlame.toggle",
+        "title": "Live Blame: Toggle"
+      },
+      {
+        "command": "liveBlame.openCommit",
+        "title": "Live Blame: Open Commit"
+      },
+      {
+        "command": "liveBlame.copyHash",
+        "title": "Live Blame: Copy Commit Hash"
+      },
+      {
+        "command": "liveBlame.openPR",
+        "title": "Live Blame: Open Pull Request"
+      },
+      {
+        "command": "liveBlame.clearCache",
+        "title": "Live Blame: Clear Cache"
+      },
+      {
+        "command": "liveBlame.blameAtRevision",
+        "title": "Live Blame: Blame at Revision…"
+      },
+      {
+        "command": "liveBlame.blamePreviousRevision",
+        "title": "Live Blame: Blame Previous Revision"
+      },
+      {
+        "command": "liveBlame.stepOlder",
+        "title": "Live Blame: Time-Travel — Step Older"
+      },
+      {
+        "command": "liveBlame.stepNewer",
+        "title": "Live Blame: Time-Travel — Step Newer"
+      },
+      {
+        "command": "liveBlame.exitTimeTravel",
+        "title": "Live Blame: Exit Time-Travel"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "liveBlame.stepOlder",
+          "when": "liveBlame.inTimeTravel"
+        },
+        {
+          "command": "liveBlame.stepNewer",
+          "when": "liveBlame.inTimeTravel"
+        },
+        {
+          "command": "liveBlame.exitTimeTravel",
+          "when": "liveBlame.inTimeTravel"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.config.mjs",
+    "watch": "node esbuild.config.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "package": "npm run build && vsce package --allow-missing-repository --no-yarn"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.84.0",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0"
+  }
+}
